@@ -1,0 +1,62 @@
+﻿@inherits Umbraco.Web.Macros.PartialViewMacroPage
+@using Umbraco.Web
+
+
+@*
+    This snippet displays a list of links of the pages immediately under the top-most page in the content tree.
+    This is the home page for a standard website.
+    It also highlights the current active page/section in the navigation with the CSS class "current".
+*@
+
+@{ 
+    var selection = Model.Content.Root().Children.Where(x => x.IsVisible()).ToArray();
+   
+   
+}
+
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <!-- menu button for smaller screens -->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav mr-auto">
+                <!--check if the array is not empty -->
+                @if (selection.Length > 0)
+                {
+                    <!--loop through each node in the array -->
+                    foreach (var item in selection)
+                    {
+                        <!-- check if node has any children -->
+                        if (item.Children().Where(x => x.IsVisible()).Count() > 0)
+                        {
+                            <!-- check if name of current content equals to the name of this node, if it does we set the CSS class to 'active', otherwise we set it to null -->
+                        <li class="@((item.Name == Model.Content.Name) ? "active" : null) nav-item dropdown">
+                            <!-- create a link with dropdown-toggle class, which will be used to display dropdown containing current node's children -->
+                            <!-- set href attribute to the url of current node and set the text inside the tag to the name of current node -->
+                            <a class="nav-link dropdown-toggle" href="@item.Url" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                @item.Name
+                            </a>
+
+                            <!-- div for dropdown menu-->
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <!-- loop through each visible child of current node -->
+                                @foreach (var subMenuItem in item.Children().Where(x => x.IsVisible()))
+                                {
+                                    <a class="dropdown-item " href="@subMenuItem.Url">@subMenuItem.Name</a>
+                                }   
+                            </div>
+                        </li>
+                    }
+                    else
+                    { <!-- if we reach this points, it means that node doesn't have any children, so we display it normally, without the dropdown -->
+                        <li class="nav-item @(item.IsAncestorOrSelf(Model.Content) ? "active" : null)">
+                            <a class="nav-link" href="@item.Url">@item.Name</a>
+                        </li>
+                    }
+                }
+            }
+            </ul>
+        </div>
+    </nav>
